@@ -96,7 +96,7 @@
             return response.json();
         })
         .then(data => {
-            document.getElementById('timestamp').innerText = "Last Updated: " + data.update_time;
+            // Convert "YYYY-MM-DD HH:MM UTC" to standard ISO format, then to IST let rawTime = data.update_time.replace(" UTC", "Z").replace(" ", "T"); let localTime = new Date(rawTime).toLocaleString("en-IN", { timeZone: "Asia/Kolkata", dateStyle: 'medium', timeStyle: 'short' }); document.getElementById('timestamp').innerText = "Last Updated: " + localTime;
             
             const grid = document.getElementById('dashboard-grid');
             grid.innerHTML = ''; 
