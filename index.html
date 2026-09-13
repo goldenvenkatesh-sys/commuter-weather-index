@@ -88,7 +88,7 @@
 </div>
 
 <script>
-    fetch('commuter_index.json')
+    fetch('commuter_index.json?v=' + new Date().getTime())
         .then(response => {
             if (!response.ok) {
                 throw new Error('Data not available yet. The automated workflow might still be running.');
