@@ -1,3 +1,12 @@
+- name: Install dependencies
+        run: pip install pandas numpy xarray requests
+
+      - name: Download Model Data
+        # Replace the URL in quotes with your actual model data API link
+        run: curl -o latest_model_run.nc "https://api.your-weather-source.com/data.nc"
+
+      - name: Run Commuter Index Script
+        run: python generate_index.py
 name: Update Commuter Weather Index
 
 on:
