@@ -1,18 +1,24 @@
 import requests
 import json
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 
 def calculate_two_wheeler_index():
-    # Target cities for the dashboard
+    # Expanded target cities for the dashboard
     cities = {
         "Chennai": {"lat": 13.0827, "lon": 80.2707},
         "Bengaluru": {"lat": 12.9716, "lon": 77.5946},
         "Coimbatore": {"lat": 11.0168, "lon": 76.9558},
-        "Kochi": {"lat": 9.9312, "lon": 76.2673}
+        "Kochi": {"lat": 9.9312, "lon": 76.2673},
+        "Madurai": {"lat": 9.9252, "lon": 78.1198},
+        "Tiruchirappalli": {"lat": 10.7905, "lon": 78.7047}
     }
     
+    # Calculate IST (UTC + 5 hours 30 minutes)
+    ist_timezone = timezone(timedelta(hours=5, minutes=30))
+    
     dashboard_data = {
-        "update_time": datetime.utcnow().strftime("%Y-%m-%d %H:%M UTC"),
+        # Formats to layman-friendly 12-hour time (e.g., "2026-09-13 05:45 PM IST")
+        "update_time": datetime.now(ist_timezone).strftime("%Y-%m-%d %I:%M %p IST"),
         "locations": []
     }
 
@@ -24,11 +30,10 @@ def calculate_two_wheeler_index():
             response.raise_for_status() 
             data = response.json()
             
-            # Extract live values
             precip_raw = data['current']['precipitation']
             wind_raw = data['current']['wind_gusts_10m']
             
-            # SAFETY CHECK: Convert None/null to 0.0 so the math doesn't crash
+            # Convert None/null to 0.0 to prevent math errors during clear skies
             precip_1hr = 0.0 if precip_raw is None else float(precip_raw)
             wind_gust = 0.0 if wind_raw is None else float(wind_raw)
             
@@ -37,7 +42,6 @@ def calculate_two_wheeler_index():
             precip_1hr = 0.0
             wind_gust = 0.0
 
-        # Apply discrete logic thresholds for color boundaries
         if precip_1hr > 15 or wind_gust > 45:
             status = "Red"
             message = "Dangerous riding conditions. Heavy rain or severe gusts."
@@ -60,7 +64,6 @@ def calculate_two_wheeler_index():
             "advice": message
         })
 
-    # Export to JSON
     with open('commuter_index.json', 'w') as f:
         json.dump(dashboard_data, f, indent=4)
         
