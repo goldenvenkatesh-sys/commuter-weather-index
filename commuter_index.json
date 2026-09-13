@@ -1,5 +1,5 @@
 {
-    "update_time": "2026-09-13 06:48 UTC",
+    "update_time": "2026-09-13 12:21 PM IST",
     "locations": [
         {
             "city": "Chennai",
@@ -27,6 +27,22 @@
         },
         {
             "city": "Kochi",
+            "precip_mm": 0.0,
+            "wind_kmh": 0.0,
+            "status": "Green",
+            "color_code": "#34C759",
+            "advice": "Clear conditions for two-wheelers."
+        },
+        {
+            "city": "Madurai",
+            "precip_mm": 0.0,
+            "wind_kmh": 0.0,
+            "status": "Green",
+            "color_code": "#34C759",
+            "advice": "Clear conditions for two-wheelers."
+        },
+        {
+            "city": "Tiruchirappalli",
             "precip_mm": 0.0,
             "wind_kmh": 0.0,
             "status": "Green",
