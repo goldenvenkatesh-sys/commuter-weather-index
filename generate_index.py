@@ -17,17 +17,20 @@ def calculate_two_wheeler_index():
     }
 
     for city, coords in cities.items():
-        # Pinging Open-Meteo's free, keyless API for ECMWF IFS model data
         url = f"https://api.open-meteo.com/v1/forecast?latitude={coords['lat']}&longitude={coords['lon']}&current=precipitation,wind_gusts_10m&models=ecmwf_ifs04"
         
         try:
             response = requests.get(url)
-            response.raise_for_status() # Check for HTTP errors
+            response.raise_for_status() 
             data = response.json()
             
             # Extract live values
-            precip_1hr = data['current']['precipitation']
-            wind_gust = data['current']['wind_gusts_10m']
+            precip_raw = data['current']['precipitation']
+            wind_raw = data['current']['wind_gusts_10m']
+            
+            # SAFETY CHECK: Convert None/null to 0.0 so the math doesn't crash
+            precip_1hr = 0.0 if precip_raw is None else float(precip_raw)
+            wind_gust = 0.0 if wind_raw is None else float(wind_raw)
             
         except Exception as e:
             print(f"Failed to fetch data for {city}: {e}")
