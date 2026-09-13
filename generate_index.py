@@ -1,38 +1,14 @@
-import xarray as xr
-import pandas as pd
+import requests
 import json
 from datetime import datetime
-import os
 
 def calculate_two_wheeler_index():
-    # 1. Define the input file
-    # Ensure your GitHub Action downloads your .nc file to this directory first,
-    # or point this to your actual WeatherNext/ECMWF data path.
-    file_path = 'latest_model_run.nc'
-    
-    # Fallback to prevent GitHub Actions from failing if the file isn't uploaded yet
-    if not os.path.exists(file_path):
-        print(f"Error: {file_path} not found. Ensure the automated pipeline downloads the .nc file before running this script.")
-        return
-
-    # 2. Load the NetCDF dataset
-    ds = xr.open_dataset(file_path)
-    
-    # 3. Constrain geographic extent to South India to reduce memory usage
-    # Note: ECMWF latitudes are typically descending (90 to -90), so slice(20, 8) is used. 
-    # If your specific model uses ascending latitudes, swap to slice(8, 20).
-    try:
-        ds_south_india = ds.sel(latitude=slice(20, 8), longitude=slice(74, 85))
-    except Exception as e:
-        print("Could not slice coordinates. Check if your dataset uses 'lat'/'lon' instead of 'latitude'/'longitude'.")
-        ds_south_india = ds # Fallback to full grid if slicing fails
-
-    # Target cities for the layman dashboard
+    # Target cities for the dashboard
     cities = {
-        "Chennai": {"lat": 13.08, "lon": 80.27},
-        "Bengaluru": {"lat": 12.97, "lon": 77.59},
-        "Coimbatore": {"lat": 11.01, "lon": 76.95},
-        "Kochi": {"lat": 9.93, "lon": 76.26}
+        "Chennai": {"lat": 13.0827, "lon": 80.2707},
+        "Bengaluru": {"lat": 12.9716, "lon": 77.5946},
+        "Coimbatore": {"lat": 11.0168, "lon": 76.9558},
+        "Kochi": {"lat": 9.9312, "lon": 76.2673}
     }
     
     dashboard_data = {
@@ -41,25 +17,24 @@ def calculate_two_wheeler_index():
     }
 
     for city, coords in cities.items():
+        # Pinging Open-Meteo's free, keyless API for ECMWF IFS model data
+        url = f"https://api.open-meteo.com/v1/forecast?latitude={coords['lat']}&longitude={coords['lon']}&current=precipitation,wind_gusts_10m&models=ecmwf_ifs04"
+        
         try:
-            # 4. Extract nearest grid point data
-            # Adjust 'tp' (Total Precipitation) and 'fg10' (10m Wind Gust) if your model uses different variable names (e.g., 'prcp', 'gust')
-            precip_raw = ds_south_india['tp'].sel(latitude=coords['lat'], longitude=coords['lon'], method='nearest').values
-            wind_raw = ds_south_india['fg10'].sel(latitude=coords['lat'], longitude=coords['lon'], method='nearest').values
+            response = requests.get(url)
+            response.raise_for_status() # Check for HTTP errors
+            data = response.json()
             
-            # ECMWF stores precipitation in meters; convert to mm
-            precip_1hr = float(precip_raw) * 1000 
+            # Extract live values
+            precip_1hr = data['current']['precipitation']
+            wind_gust = data['current']['wind_gusts_10m']
             
-            # ECMWF stores wind gusts in m/s; convert to km/h
-            wind_gust = float(wind_raw) * 3.6     
-            
-        except KeyError:
-            # Fallback if variables aren't found in the dataset
-            print(f"Variables 'tp' or 'fg10' not found for {city}.")
+        except Exception as e:
+            print(f"Failed to fetch data for {city}: {e}")
             precip_1hr = 0.0
             wind_gust = 0.0
 
-        # 5. Apply discrete logic thresholds for color boundaries
+        # Apply discrete logic thresholds for color boundaries
         if precip_1hr > 15 or wind_gust > 45:
             status = "Red"
             message = "Dangerous riding conditions. Heavy rain or severe gusts."
@@ -82,12 +57,11 @@ def calculate_two_wheeler_index():
             "advice": message
         })
 
-    # 6. Export to JSON
+    # Export to JSON
     with open('commuter_index.json', 'w') as f:
         json.dump(dashboard_data, f, indent=4)
         
-    print("Dashboard data generated successfully from model data.")
-    ds.close()
+    print("Live ECMWF data fetched and dashboard updated successfully.")
 
 if __name__ == "__main__":
     calculate_two_wheeler_index()
