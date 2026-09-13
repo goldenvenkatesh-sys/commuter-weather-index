@@ -1,0 +1,37 @@
+{
+    "update_time": "2026-09-13 05:44 UTC",
+    "locations": [
+        {
+            "city": "Chennai",
+            "precip_mm": 19.1,
+            "wind_kmh": 45.3,
+            "status": "Red",
+            "color_code": "#FF3B30",
+            "advice": "Dangerous riding conditions. Heavy rain or severe gusts."
+        },
+        {
+            "city": "Bengaluru",
+            "precip_mm": 17.8,
+            "wind_kmh": 15.4,
+            "status": "Red",
+            "color_code": "#FF3B30",
+            "advice": "Dangerous riding conditions. Heavy rain or severe gusts."
+        },
+        {
+            "city": "Coimbatore",
+            "precip_mm": 24.6,
+            "wind_kmh": 37.4,
+            "status": "Red",
+            "color_code": "#FF3B30",
+            "advice": "Dangerous riding conditions. Heavy rain or severe gusts."
+        },
+        {
+            "city": "Kochi",
+            "precip_mm": 5.0,
+            "wind_kmh": 16.9,
+            "status": "Red",
+            "color_code": "#FF3B30",
+            "advice": "Dangerous riding conditions. Heavy rain or severe gusts."
+        }
+    ]
+}
