@@ -1,26 +1,15 @@
-- name: Install dependencies
-        run: pip install pandas numpy xarray requests
-
-      - name: Download Model Data
-        # Replace the URL in quotes with your actual model data API link
-        run: curl -o latest_model_run.nc "https://api.your-weather-source.com/data.nc"
-
-      - name: Run Commuter Index Script
-        run: python generate_index.py
 name: Update Commuter Weather Index
 
 on:
   schedule:
-    # Runs automatically every 3 hours
     - cron: '0 */3 * * *'
   workflow_dispatch:
-    # Allows you to click a button to run it manually
 
 jobs:
   update-data:
     runs-on: ubuntu-latest
     permissions:
-      contents: write # Required so the bot can push the JSON file back to your repo
+      contents: write
 
     steps:
       - name: Checkout repository
@@ -32,11 +21,9 @@ jobs:
           python-version: '3.10'
 
       - name: Install dependencies
-        # Adding the libraries needed for your ECMWF/xarray processing
-        run: pip install pandas numpy xarray requests
+        run: pip install requests
 
       - name: Run Commuter Index Script
-        # Make sure this matches the name of your Python file
         run: python generate_index.py
 
       - name: Commit and push new data
@@ -44,5 +31,5 @@ jobs:
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
           git add commuter_index.json
-          git commit -m "Automated commuter index update" || echo "No changes to commit"
+          git commit -m "Automated live model data update" || echo "No changes to commit"
           git push
